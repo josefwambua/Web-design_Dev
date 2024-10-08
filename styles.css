@@ -1,0 +1,168 @@
+/* /* .container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.items{
+    flex: 1 1 200px;
+    margin: 10px;
+    padding: 20px;
+    background-color: lightblue;
+} 
+
+
+.grid-container{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 100px auto 100px;
+    grid-gap: 10px;
+    grid-template-areas: 
+    "header header header"
+    "sidebar sidebar sidebar"
+    "footer footer footer";
+    height: 100vh;
+}
+.header{
+    grid-area: header;
+    background-color:lightblue;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+.sidebar{
+    grid-area: sidebar;
+    background-color:burlywood;
+    padding: 20px;
+}
+.content{
+    grid-area: content;
+    background-color: aqua;
+    padding: 20px;
+}
+footer{
+    grid-area: footer;
+    background-color: green;
+    color: white;
+    text-align: center;
+    padding: 20px;
+} */
+
+
+/* Basic reset */
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    line-height: 1.6;
+
+}
+header, nav, main, footer{
+    padding: 1rem;
+    text-align: center;
+}
+nav ul{
+    list-style: none;
+    padding: 0 ;
+}
+nav ul li{
+    display: inline;
+    margin-right: 1rem;
+}
+nav ul li{
+    text-decoration: none;
+    color: #bbbbbb;
+}
+
+
+/* Default styles */
+
+body{
+    background-color: rgba(255, 255, 255, 0.38)
+}
+
+/* styles for devices with a max width of 768px (tablets and mobile phones) */
+@media(max-width:768px){
+    header, nav,main, footer{
+        padding: 0.5rem;
+    }
+    nav ul li{
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Landscape tablets  and larger devices */
+
+@media (min-width: 769px) and(orientation: landscape){
+    body{
+        background-color: #fff;
+    }
+    nav ul{
+        display: flex;
+        justify-content: center;
+    }
+    nav ul li{
+        display: inline;
+        margin-right: 1rem;
+    }
+}
+/* High-DPI displays (retina displays) */
+@media(-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {
+    body{
+        font-size: 1.2rem;
+    }
+}
+/* Responsive layout techniques - Fluid grids -> use relative units like percentages for layout widths */
+.container{
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+/* Flex images - ensure inmages scale with their containers */
+img{
+    max-width: 100%;
+    height: auto;
+}
+
+/* Responsive Typography - adjust font sizes for different viewports */
+body{
+    font-size:16px;
+}
+@media (max-width: 768px){
+    body{
+        font-size: 14px;
+    }
+}
+
+@media (min-width:1200px){
+    body{
+        font-size: 18px;
+    }
+}
+
+/* Advanced media queries - Device orientation */
+
+/* potrait */
+@media (orientation: potrait){
+    body{ background-color: #bbbbbb;
+    }
+}
+/*landscape */
+@media (orientation: landscape){
+    body{ background-color: #bbbbbb}
+}
+
+/* High-DPI displays */
+
+@media(-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {
+    .logo{
+        background-image:url('logo@2x.png');
+    }
+}
