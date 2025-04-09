@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transaction Tracker</title>
+    <style>
+      :root {
+        --primary-color: #3a86ff;
+        --income-color: #38b000;
+        --expense-color: #e63946;
+        --savings-color: #ff8800;
+        --light-bg: #f8f9fa;
+        --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --hover-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        --border-radius: 10px;
+        --spacing-sm: 8px;
+        --spacing-md: 16px;
+        --spacing-lg: 24px;
+        
+      }
+
+      /* Dark mode variables */
+      .dark-mode {
+        --primary-color: #5a9eff;
+        --income-color: #4cc21a;
+        --expense-color: #ff5a65;
+        --savings-color: #ffa033;
+        --light-bg: #1a1a1a;
+        --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        --hover-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+        background-color: #121212;
+        color: #e0e0e0;
+      }
+
+      .dark-mode .dashboard,
+      .dark-mode .transaction-form,
+      .dark-mode .transactions-container,
+      .dark-mode .calculator-popup {
+        background-color: #222;
+        color: #e0e0e0;
+      }
+
+      .dark-mode .transaction-item {
+        background-color: #333;
+      }
+
+      .dark-mode .calc-display,
+      .dark-mode .form-group input,
+      .dark-mode .form-group select {
+        background-color: #333;
+        color: #e0e0e0;
+        border-color: #444;
+      }
+
+      .dark-mode .calc-button {
+        background-color: #444;
+        color: #e0e0e0;
+      }
+
+      .dark-mode .calc-button.function {
+        background-color: #553311;
+        color: #ffc399;
+      }
+
+      .dark-mode .calc-button.operator {
+        background-color: #113355;
+        color: #99c3ff;
+      }
+
+      .dark-mode .app-subtitle,
+      .dark-mode .transaction-date,
+      .dark-mode .app-footer {
+        color: #aaa;
+      }
+
+      .dark-mode .form-section-title {
+        border-bottom-color: #444;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: Garamond;
+        background-color: var(--light-bg);
+        color: #333;
+        line-height: 1.6;
+        padding: var(--spacing-md);
+        min-height: 100vh;
+      }
+
+      /* Header */
+      .app-header {
+        text-align: center;
+        margin-bottom: var(--spacing-lg);
+        position: relative;
+      }
+
+      .app-title {
+        font-size: 2.2rem;
+        margin-bottom: 5px;
+        color: var(--primary-color);
+        font-weight: 600;
+      }
+
+      .app-subtitle {
+        font-size: 1rem;
+        color: #666;
+        margin-bottom: var(--spacing-md);
+      }
+
+      /* Main container */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+      }
+
+      @media (min-width: 768px) {
+        .container {
+          grid-template-columns: 340px 1fr;
+          align-items: start;
+        }
+      }
+
+      /* Dashboard */
+      .dashboard {
+        background-color: white;
+        border-radius: var(--border-radius);
+        padding: var(--spacing-lg);
+        box-shadow: var(--card-shadow);
+      }
+
+      /* Score Cards */
+      .score-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      @media (min-width: 400px) {
+        .score-cards {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 768px) {
+        .score-cards {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 992px) {
+        .score-cards {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .score-card {
+        padding: var(--spacing-md);
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
+      }
+
+      .score-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+      }
+
+      .score-card h2 {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-sm);
+        color: #555;
+        font-weight: 600;
+      }
+
+      .score-card p {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      /* Individual card colors */
+      .income-card {
+        background: linear-gradient(135deg, #d4ffcb 0%, #e9f9e0 100%);
+        border-left: 4px solid var(--income-color);
+      }
+
+      .income-card p {
+        color: var(--income-color);
+      }
+
+      .expense-card {
+        background: linear-gradient(135deg, #ffcccb 0%, #ffe0df 100%);
+        border-left: 4px solid var(--expense-color);
+      }
+
+      .expense-card p {
+        color: var(--expense-color);
+      }
+
+      .balance-card {
+        background: linear-gradient(135deg, #c4e0ff 0%, #dfeeff 100%);
+        border-left: 4px solid var(--primary-color);
+      }
+
+      .balance-card p {
+        color: var(--primary-color);
+      }
+
+      .savings-card {
+        background: linear-gradient(135deg, #ffeacc 0%, #fff2e0 100%);
+        border-left: 4px solid var(--savings-color);
+      }
+
+      .savings-card p {
+        color: var(--savings-color);
+      }
+
+      /* Transaction Form */
+      .transaction-form {
+        background-color: white;
+        border-radius: var(--border-radius);
+        padding: var(--spacing-lg);
+        box-shadow: var(--card-shadow);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .form-section-title {
+        font-size: 1.2rem;
+        margin-bottom: var(--spacing-md);
+        color: #444;
+        font-weight: 600;
+        border-bottom: 2px solid var(--light-bg);
+        padding-bottom: var(--spacing-sm);
+      }
+
+      .form-group {
+        margin-bottom: var(--spacing-md);
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+        font-weight: 500;
+        color: #555;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: var(--border-radius);
+        border: 1px solid #ddd;
+        font-size: 1rem;
+        transition: border 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(58, 134, 255, 0.2);
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 12px 20px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        width: 100%;
+        text-align: center;
+      }
+
+      .btn:hover {
+        background-color: #2e6ed4;
+        transform: translateY(-2px);
+      }
+
+      .btn-add {
+        background-color: var(--income-color);
+      }
+
+      .btn-add:hover {
+        background-color: #2d9400;
+      }
+
+      .btn-calc {
+        background-color: var(--primary-color);
+        margin-top: var(--spacing-sm);
+      }
+
+      .btn-group {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+
+      @media (min-width: 576px) {
+        .btn-group {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      /* Transaction List */
+      .transactions-container {
+        background-color: white;
+        border-radius: var(--border-radius);
+        padding: var(--spacing-lg);
+        box-shadow: var(--card-shadow);
+      }
+
+      .transactions-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+      }
+
+      .transactions-title {
+        font-size: 1.2rem;
+        color: #444;
+        font-weight: 600;
+      }
+
+      .transaction-list {
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--spacing-md);
+        background-color: var(--light-bg);
+        border-radius: var(--border-radius);
+        margin-bottom: var(--spacing-md);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease;
+      }
+
+      .transaction-item:hover {
+        transform: translateX(5px);
+      }
+
+      .transaction-item.income {
+        border-left: 4px solid var(--income-color);
+      }
+
+      .transaction-item.expense {
+        border-left: 4px solid var(--expense-color);
+      }
+
+      .transaction-item.savings {
+        border-left: 4px solid var(--savings-color);
+      }
+
+      .transaction-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .transaction-description {
+        font-weight: 500;
+        font-size: 1.1rem;
+        color: #333;
+      }
+
+      .transaction-date {
+        font-size: 0.85rem;
+        color: #777;
+        margin-top: 4px;
+      }
+
+      .transaction-amount {
+        font-weight: bold;
+        font-size: 1.1rem;
+      }
+
+      .income .transaction-amount {
+        color: var(--income-color);
+      }
+
+      .expense .transaction-amount {
+        color: var(--expense-color);
+      }
+
+      .savings .transaction-amount {
+        color: var(--savings-color);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: var(--spacing-lg);
+        color: #777;
+      }
+
+      .empty-state i {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-sm);
+        display: block;
+      }
+
+      /* Scientific Calculator Popup */
+      .calculator-popup {
+        display: none;
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        width: 340px;
+        max-width: 95vw;
+      }
+
+      .calc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+      }
+
+      .calc-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .calc-display {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: var(--spacing-md);
+        font-size: 1.8rem;
+        text-align: right;
+        background-color: var(--light-bg);
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .calc-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+
+      .calc-button {
+        padding: 15px 0;
+        background-color: #f0f0f0;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+      }
+
+      .calc-button:active {
+        transform: scale(0.95);
+      }
+
+      .calc-button:hover {
+        background-color: #e0e0e0;
+      }
+
+      .calc-button.function {
+        background-color: #ffe0cc;
+        color: #d65b00;
+      }
+
+      .calc-button.operator {
+        background-color: #cce0ff;
+        color: #0056b3;
+      }
+
+      .calc-button.equals {
+        background-color: var(--income-color);
+        color: white;
+      }
+
+      .calc-button.clear {
+        background-color: var(--expense-color);
+        color: white;
+      }
+
+      .calc-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #555;
+        transition: color 0.2s ease;
+      }
+
+      .calc-close:hover {
+        color: #222;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 20px;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+        display: none;
+        backdrop-filter: blur(3px);
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 576px) {
+        .app-title {
+          font-size: 1.8rem;
+        }
+
+        .score-card h2 {
+          font-size: 0.9rem;
+        }
+
+        .score-card p {
+          font-size: 1.2rem;
+        }
+
+        .calc-button {
+          padding: 12px 0;
+          font-size: 1rem;
+        }
+      }
+
+      /* Dark mode toggle */
+      .theme-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--primary-color);
+      }
+
+      /* Animation for theme switch */
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      body {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      /* Footer */
+      .app-footer {
+        text-align: center;
+        margin-top: var(--spacing-lg);
+        padding: var(--spacing-md) 0;
+        color: #777;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="overlay" id="overlay"></div>
+
+    <div class="app-header">
+      <h1 class="app-title">Transaction Tracker</h1>
+      <p class="app-subtitle">Keep track of your income, expenses, and savings</p>
+      <button class="theme-toggle" id="theme-toggle">🌙</button>
+    </div>
+
+    <div class="container">
+      <div class="side-panel">
+        <!-- Transaction Form -->
+        <div class="transaction-form">
+          <h2 class="form-section-title">New Transaction</h2>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <input type="text" id="description" placeholder="What's this transaction for?" />
+          </div>
+          <div class="form-group">
+            <label for="amount">Amount (Ksh)</label>
+            <input type="number" id="amount" placeholder="Enter amount" />
+          </div>
+          <div class="form-group">
+            <label for="type">Transaction Type</label>
+            <select id="type">
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+              <option value="savings">Savings</option>
+            </select>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-add" id="add-transaction">Add Transaction</button>
+            <button class="btn btn-calc" id="show-calculator">Calculator</button>
+          </div>
+        </div>
+
+        <!-- Score Cards -->
+        <div class="dashboard">
+          <h2 class="form-section-title">Financial Overview</h2>
+          <div class="score-cards">
+            <div class="score-card income-card">
+              <h2>Income</h2>
+              <p id="total-income">Ksh 0</p>
+            </div>
+            <div class="score-card expense-card">
+              <h2>Expense</h2>
+              <p id="total-expense">Ksh 0</p>
+            </div>
+            <div class="score-card balance-card">
+              <h2>Balance</h2>
+              <p id="account-balance">Ksh 0</p>
+            </div>
+            <div class="score-card savings-card">
+              <h2>Savings</h2>
+              <p id="total-savings">Ksh 0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction List -->
+      <div class="transactions-container">
+        <div class="transactions-header">
+          <h2 class="transactions-title">Recent Transactions</h2>
+        </div>
+        <div class="transaction-list" id="transaction-list">
+          <div class="empty-state">
+            <i>📊</i>
+            <p>No transactions yet. Add your first transaction to get started!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scientific Calculator Popup -->
+    <div class="calculator-popup" id="calculator-popup">
+      <div class="calc-header">
+        <h3 class="calc-title">Scientific Calculator</h3>
+        <button class="calc-close" id="calc-close">×</button>
+      </div>
+      <div class="calc-display" id="calc-display">0</div>
+      <div class="calc-buttons">
+        <button class="calc-button clear" id="clear">C</button>
+        <button class="calc-button function" id="backspace">⌫</button>
+        <button class="calc-button function" id="percent">%</button>
+        <button class="calc-button operator" id="divide">÷</button>
+        
+        <button class="calc-button function" id="sin">sin</button>
+        <button class="calc-button" id="seven">7</button>
+        <button class="calc-button" id="eight">8</button>
+        <button class="calc-button" id="nine">9</button>
+        
+        <button class="calc-button function" id="cos">cos</button>
+        <button class="calc-button" id="four">4</button>
+        <button class="calc-button" id="five">5</button>
+        <button class="calc-button" id="six">6</button>
+        
+        <button class="calc-button function" id="tan">tan</button>
+        <button class="calc-button" id="one">1</button>
+        <button class="calc-button" id="two">2</button>
+        <button class="calc-button" id="three">3</button>
+        
+        <button class="calc-button function" id="sqrt">√</button>
+        <button class="calc-button" id="zero">0</button>
+        <button class="calc-button" id="decimal">.</button>
+        <button class="calc-button operator" id="add">+</button>
+        
+        <button class="calc-button function" id="log">log</button>
+        <button class="calc-button function" id="pow">x^y</button>
+        <button class="calc-button operator" id="subtract">−</button>
+        <button class="calc-button operator" id="multiply">×</button>
+        
+        <button class="calc-button function" id="pi">π</button>
+        <button class="calc-button function" id="e">e</button>
+        <button class="calc-button function" id="useResult">Use</button>
+        <button class="calc-button equals" id="equals">=</button>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      <p>© 2025 Transaction Tracker | Manage your finances with ease</p>
+    </footer>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // App state
+        const state = {
+          transactions: [],
+          darkMode: false
+        };
+
+        // Elements
+        const elements = {
+          description: document.getElementById("description"),
+          amount: document.getElementById("amount"),
+          type: document.getElementById("type"),
+          addTransactionBtn: document.getElementById("add-transaction"),
+          income: document.getElementById("total-income"),
+          expense: document.getElementById("total-expense"),
+          balance: document.getElementById("account-balance"),
+          savings: document.getElementById("total-savings"),
+          transactionList: document.getElementById("transaction-list"),
+          showCalculatorBtn: document.getElementById("show-calculator"),
+          calculatorPopup: document.getElementById("calculator-popup"),
+          overlay: document.getElementById("overlay"),
+          calcDisplay: document.getElementById("calc-display"),
+          calcClose: document.getElementById("calc-close"),
+          themeToggle: document.getElementById("theme-toggle")
+        };
+
+        // Calculate totals
+        const calculateTotals = () => {
+          return state.transactions.reduce(
+            (acc, t) => {
+              if (t.type === 'income') {
+                acc.income += t.amount;
+              } else if (t.type === 'expense') {
+                acc.expense += t.amount;
+              } else if (t.type === 'savings') {
+                acc.savings += t.amount;
+              }
+              return acc;
+            },
+            { income: 0, expense: 0, savings: 0 }
+          );
+        };
+
+        // Format currency
+        const formatCurrency = (amount) => {
+          return `Ksh ${amount.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        };
+
+        // Format date
+        const formatDate = (timestamp) => {
+          const date = new Date(timestamp);
+          return date.toLocaleDateString('en-KE', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        };
+
+        // Render function
+        const render = () => {
+          const { income, expense, savings } = calculateTotals();
+          // Balance is income minus expenses and savings
+          const balance = income - expense - savings;
+
+          elements.income.textContent = formatCurrency(income);
+          elements.expense.textContent = formatCurrency(expense);
+          elements.balance.textContent = formatCurrency(balance);
+          elements.savings.textContent = formatCurrency(savings);
+
+          if (state.transactions.length === 0) {
+            elements.transactionList.innerHTML = `
+              <div class="empty-state">
+                <i>📊</i>
+                <p>No transactions yet. Add your first transaction to get started!</p>
+              </div>
+            `;
+          } else {
+            elements.transactionList.innerHTML = state.transactions
+              .map(t => {
+                const symbol = t.type === "income" ? "+" : "-";
+                return `
+                  <div class="transaction-item ${t.type}">
+                    <div class="transaction-info">
+                      <span class="transaction-description">${t.description}</span>
+                      <span class="transaction-date">${formatDate(t.id)}</span>
+                    </div>
+                    <span class="transaction-amount">${symbol} ${formatCurrency(t.amount).substring(4)}</span>
+                  </div>
+                `;
+              })
+              .join("");
+          }
+        };
+
+        // Handle add transaction
+        const handleAddTransaction = () => {
+          const description = elements.description.value.trim();
+          const amount = parseFloat(elements.amount.value);
+          const type = elements.type.value;
+
+          if (!description || isNaN(amount) || amount <= 0) {
+            alert("Please enter a valid description and amount.");
+            return;
+          }
+
+          const { income, expense, savings } = calculateTotals();
+          const balance = income - expense - savings;
+
+          // Check if there's enough balance for expenses and savings
+          if ((type === "expense" || type === "savings") && amount > balance) {
+            alert("Transaction declined: Insufficient balance!");
+            return;
+          }
+
+          state.transactions.unshift({
+            id: Date.now(),
+            description,
+            amount,
+            type,
+          });
+
+          // Save to local storage
+          localStorage.setItem('transactions', JSON.stringify(state.transactions));
+
+          elements.description.value = "";
+          elements.amount.value = "";
+          render();
+        };
+
+        // Load transactions from local storage
+        const loadTransactions = () => {
+          const savedTransactions = localStorage.getItem('transactions');
+          if (savedTransactions) {
+            state.transactions = JSON.parse(savedTransactions);
+            render();
+          }
+        };
+
+        // Toggle dark/light theme
+        const toggleTheme = () => {
+          state.darkMode = !state.darkMode;
+          document.body.classList.toggle('dark-mode', state.darkMode);
+          elements.themeToggle.textContent = state.darkMode ? '☀️' : '🌙';
+          localStorage.setItem('darkMode', state.darkMode);
+        };
+
+        // Load theme preference
+        const loadTheme = () => {
+          const savedTheme = localStorage.getItem('darkMode');
+          if (savedTheme === 'true') {
+            state.darkMode = true;
+            document.body.classList.add('dark-mode');
+            elements.themeToggle.textContent = '☀️';
+          }
+        };
+
+        // Scientific Calculator
+        class ScientificCalculator {
+          constructor() {
+            this.display = '0';
+            this.firstOperand = null;
+            this.waitingForSecondOperand = false;
+            this.operator = null;
+            this.decimalAdded = false;
+            
+            this.initButtonListeners();
+          }
+          
+          updateDisplay() {
+            elements.calcDisplay.textContent = this.display;
+          }
+          
+          appendToDisplay(value) {
+            if (this.waitingForSecondOperand) {
+              this.display = value;
+              this.waitingForSecondOperand = false;
+            } else {
+              this.display = this.display === '0' ? value : this.display + value;
+            }
+            this.updateDisplay();
+          }
+          
+          handleDigit(digit) {
+            this.appendToDisplay(digit);
+          }
+          
+          handleDecimal() {
+            if (this.waitingForSecondOperand) {
+              this.display = '0.';
+              this.waitingForSecondOperand = false;
+              this.updateDisplay();
+              return;
+            }
+            
+            if (!this.display.includes('.')) {
+              this.appendToDisplay('.');
+            }
+          }
+          
+          handleClear() {
+            this.display = '0';
+            this.firstOperand = null;
+            this.waitingForSecondOperand = false;
+            this.operator = null;
+            this.updateDisplay();
+          }
+          
+          handleBackspace() {
+            if (this.display.length > 1) {
+              this.display = this.display.substring(0, this.display.length - 1);
+            } else {
+              this.display = '0';
+            }
+            this.updateDisplay();
+          }
+          
+          handleOperator(operator) {
+            const inputValue = parseFloat(this.display);
+            
+            if (this.firstOperand === null) {
+              this.firstOperand = inputValue;
+            } else if (this.operator) {
+              const result = this.calculate(this.firstOperand, inputValue, this.operator);
+              this.display = String(result);
+              this.firstOperand = result;
+            }
+            
+            this.waitingForSecondOperand = true;
+            this.operator = operator;
+            this.updateDisplay();
+          }
+          
+          calculate(firstOperand, secondOperand, operator) {
+            switch(operator) {
+              case '+':
+                return firstOperand + secondOperand;
+              case '−':
+                return firstOperand - secondOperand;
+              case '×':
+                return firstOperand * secondOperand;
+              case '÷':
+                return firstOperand / secondOperand;
+              case 'x^y':
+                return Math.pow(firstOperand, secondOperand);
+              default:
+                return secondOperand;
+            }
+          }
+          
+          handleEquals() {
+            if (!this.operator || this.firstOperand === null) return;
+            
+            const inputValue = parseFloat(this.display);
+            const result = this.calculate(this.firstOperand, inputValue, this.operator);
+            
+            this.display = String(result);
+            this.firstOperand = result;
+            this.waitingForSecondOperand = false;
+            this.operator = null;
+            this.updateDisplay();
+          }
+          
+        
+          handlePercent() {
+            const currentValue = parseFloat(this.display);
+            if (!isNaN(currentValue)) {
+              this.display = String(currentValue / 100);
+              this.updateDisplay();
+            }
+          }
+          
+          handleSqrt() {
+            const currentValue = parseFloat(this.display);
+            if (!isNaN(currentValue) && currentValue >= 0) {
+              this.display = String(Math.sqrt(currentValue));
+              this.updateDisplay();
+            } else {
+              alert("Cannot calculate square root of a negative number");
+            }
+          }
+          
+          handleSin() {
+            const currentValue = parseFloat(this.display);
+            if (!isNaN(currentValue)) {
+              // Convert degrees to radians for calculation
+              this.display = String(Math.sin(currentValue * Math.PI / 180));
+              this.updateDisplay();
+            }
+          }
+          
+          handleCos() {
+            const currentValue = parseFloat(this.display);
+            if (!isNaN(currentValue)) {
+              // Convert degrees to radians for calculation
+              this.display = String(Math.cos(currentValue * Math.PI / 180));
+              this.updateDisplay();
+            }
+          }
+          
+          handleTan() {
+            const currentValue = parseFloat(this.display);
+            if (!isNaN(currentValue)) {
+              // Convert degrees to radians for calculation
+              this.display = String(Math.tan(currentValue * Math.PI / 180));
+              this.updateDisplay();
+            }
+          }
+          
+          handleLog() {
+            const currentValue = parseFloat(this.display);
+            if (!isNaN(currentValue) && currentValue > 0) {
+              this.display = String(Math.log10(currentValue));
+              this.updateDisplay();
+            } else {
+              alert("Cannot calculate logarithm of a non-positive number");
+            }
+          }
+          
+          handlePow() {
+            this.handleOperator('x^y');
+          }
+          
+          handlePi() {
+            this.display = String(Math.PI);
+            this.updateDisplay();
+          }
+          
+          handleE() {
+            this.display = String(Math.E);
+            this.updateDisplay();
+          }
+          
+          handleUseResult() {
+            elements.amount.value = this.display;
+            this.handleCloseCalculator();
+          }
+          
+          handleCloseCalculator() {
+            elements.calculatorPopup.style.display = 'none';
+            elements.overlay.style.display = 'none';
+          }
+          
+          initButtonListeners() {
+            // Digit buttons
+            document.getElementById('zero').addEventListener('click', () => this.handleDigit('0'));
+            document.getElementById('one').addEventListener('click', () => this.handleDigit('1'));
+            document.getElementById('two').addEventListener('click', () => this.handleDigit('2'));
+            document.getElementById('three').addEventListener('click', () => this.handleDigit('3'));
+            document.getElementById('four').addEventListener('click', () => this.handleDigit('4'));
+            document.getElementById('five').addEventListener('click', () => this.handleDigit('5'));
+            document.getElementById('six').addEventListener('click', () => this.handleDigit('6'));
+            document.getElementById('seven').addEventListener('click', () => this.handleDigit('7'));
+            document.getElementById('eight').addEventListener('click', () => this.handleDigit('8'));
+            document.getElementById('nine').addEventListener('click', () => this.handleDigit('9'));
+            
+            // Operator buttons
+            document.getElementById('add').addEventListener('click', () => this.handleOperator('+'));
+            document.getElementById('subtract').addEventListener('click', () => this.handleOperator('−'));
+            document.getElementById('multiply').addEventListener('click', () => this.handleOperator('×'));
+            document.getElementById('divide').addEventListener('click', () => this.handleOperator('÷'));
+            
+            // Function buttons
+            document.getElementById('decimal').addEventListener('click', () => this.handleDecimal());
+            document.getElementById('clear').addEventListener('click', () => this.handleClear());
+            document.getElementById('backspace').addEventListener('click', () => this.handleBackspace());
+            document.getElementById('equals').addEventListener('click', () => this.handleEquals());
+            document.getElementById('percent').addEventListener('click', () => this.handlePercent());
+            document.getElementById('sqrt').addEventListener('click', () => this.handleSqrt());
+            document.getElementById('sin').addEventListener('click', () => this.handleSin());
+            document.getElementById('cos').addEventListener('click', () => this.handleCos());
+            document.getElementById('tan').addEventListener('click', () => this.handleTan());
+            document.getElementById('log').addEventListener('click', () => this.handleLog());
+            document.getElementById('pow').addEventListener('click', () => this.handlePow());
+            document.getElementById('pi').addEventListener('click', () => this.handlePi());
+            document.getElementById('e').addEventListener('click', () => this.handleE());
+            document.getElementById('useResult').addEventListener('click', () => this.handleUseResult());
+          }
+        }
+
+        // Initialize calculator
+        const calculator = new ScientificCalculator();
+
+        // Event listeners
+        elements.addTransactionBtn.addEventListener('click', handleAddTransaction);
+        elements.showCalculatorBtn.addEventListener('click', () => {
+          elements.calculatorPopup.style.display = 'block';
+          elements.overlay.style.display = 'block';
+        });
+        elements.calcClose.addEventListener('click', () => calculator.handleCloseCalculator());
+        elements.overlay.addEventListener('click', () => calculator.handleCloseCalculator());
+        elements.themeToggle.addEventListener('click', toggleTheme);
+
+        // Allow Enter key to add transaction
+        elements.amount.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            handleAddTransaction();
+          }
+        });
+
+        // Initialize app
+        loadTransactions();
+        loadTheme();
+        render();
+      });
+    </script>
+  </body>
+</html>
